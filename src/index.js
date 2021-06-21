@@ -1,17 +1,28 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import React from "react";
+import ReactDOM from "react-dom";
+import App from "./App";
+import reducers from "./reducers";
+import { createStore, applyMiddleware } from "redux";
+import { composeWithDevTools } from "redux-devtools-extension";
+import { Provider } from "react-redux";
+import createSagaMiddleware from "redux-saga";
+import axios from "axios";
+import rootSaga from "./sagas";
 
-ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('root')
+const sagaMiddleware = createSagaMiddleware();
+const store = createStore(
+  reducers,
+  composeWithDevTools(applyMiddleware(sagaMiddleware))
 );
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+sagaMiddleware.run(rootSaga);
+axios.defaults.baseURL = "http://rem-rest-api.herokuapp.com/api";
+axios.defaults.withCredentials = true;
+ReactDOM.render(
+  <React.StrictMode>
+    <Provider store={store}>
+      <App />
+    </Provider>
+  </React.StrictMode>,
+  document.getElementById("root")
+);
